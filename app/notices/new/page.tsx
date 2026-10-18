@@ -4,14 +4,14 @@ import { CharCountTextarea } from "@/components/CharCountTextarea";
 import { NOTICE_CATEGORIES } from "@/models/Notice";
 
 const inputClass =
-  "rounded-md border border-black/[.08] px-3 py-2 text-sm outline-none focus:border-indigo-400 dark:border-white/[.145] dark:bg-transparent";
+  "rounded-md border border-black/[.08] px-3 py-2 text-sm outline-none focus:border-zinc-400 dark:border-white/[.145] dark:bg-transparent";
 
 // Server Component + <form action={Server Action}>
 // 글자 수 카운터(CharCountTextarea)만 Client Component로 분리했습니다.
 export default function NewNoticePage() {
   return (
     <div className="mx-auto flex max-w-2xl flex-1 flex-col gap-6 px-8 py-16">
-      <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">공지 작성</h1>
+      <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">새 공지 작성</h1>
       <form action={createNoticeAction} className="flex flex-col gap-4">
         <div className="flex gap-3">
           <div className="flex w-32 flex-col gap-1.5">

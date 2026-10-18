@@ -33,7 +33,7 @@ async function seedIfEmpty() {
   const count = await ProductModel.countDocuments();
   if (count > 0) return;
   await ProductModel.insertMany([
-    { name: "호진 보드 스티커", description: "노트북에 붙이는 호진 보드 로고 스티커", likes: 4 },
+    { name: "정보보호학과 스티커", description: "노트북에 붙이는 학과 로고 스티커", likes: 4 },
     { name: "정보보호학과 후드티", description: "시험 기간 밤샘용 따뜻한 학과 후드티", likes: 7 },
     { name: "보안 체크리스트 노트", description: "비밀번호 해싱부터 XSS까지 정리한 공부 노트", likes: 2 },
   ]);
