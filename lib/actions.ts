@@ -7,10 +7,26 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
-import { likeProduct as likeProductInDb } from "@/lib/products";
+import { likeProduct as likeProductInDb, createProduct } from "@/lib/products";
 import { createNotice } from "@/lib/notices";
 import { createUser } from "@/lib/users";
+import { NOTICE_CATEGORIES } from "@/models/Notice";
 import { signIn, signOut } from "@/auth";
+
+// (4주차 과제) 새 상품 추가 — 폼 + Server Action
+// 브라우저의 required/maxLength는 개발자도구로 우회할 수 있으므로 서버에서 다시 검증합니다.
+export async function createProductAction(formData: FormData) {
+  const name = String(formData.get("name") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+
+  if (!name || !description || name.length > 50 || description.length > 300) {
+    throw new Error("상품명(50자 이내)과 설명(300자 이내)을 입력해주세요.");
+  }
+
+  const product = await createProduct({ name, description });
+  revalidatePath("/products");
+  redirect(`/products/${product.id}`);
+}
 
 export async function likeProductAction(id: string) {
   const newLikes = await likeProductInDb(id);
@@ -28,14 +44,20 @@ export async function createNoticeAction(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   const author = String(formData.get("author") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
+  const categoryInput = String(formData.get("category") ?? "일반");
+  // 정해진 카테고리 목록에 없는 값이 오면 "일반"으로 (조작된 요청 방어)
+  const category = (NOTICE_CATEGORIES as readonly string[]).includes(categoryInput)
+    ? categoryInput
+    : "일반";
 
   if (!title || !author || !content) {
-    // 실습 단계의 아주 단순한 검증입니다.
-    // 실제 서비스라면 에러 상태를 돌려주고 폼에 메시지를 보여줘야 합니다.
     throw new Error("제목, 작성자, 내용을 모두 입력해주세요.");
   }
+  if (title.length > 100 || author.length > 30 || content.length > 2000) {
+    throw new Error("입력 길이 제한을 초과했습니다.");
+  }
 
-  const notice = await createNotice({ title, author, content });
+  const notice = await createNotice({ title, author, content, category });
   revalidatePath("/notices");
   redirect(`/notices/${notice.id}`);
 }
