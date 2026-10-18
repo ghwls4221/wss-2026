@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "웹서버보안프로그래밍 실습 — 정호진",
-  description: "Next.js 16 App Router 실습 (3~7주차 과제)",
+  title: "웹서버보안프로그래밍 — 정호진",
+  description: "Next.js 16 App Router 실습 — Auth.js 로그인/회원가입 (7주차)",
 };
 
 // app/layout.tsx는 모든 페이지를 감싸는 "루트 레이아웃"입니다.

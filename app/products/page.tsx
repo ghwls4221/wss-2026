@@ -9,7 +9,9 @@ export default async function ProductsPage() {
   return (
     <div className="mx-auto max-w-2xl flex-1 px-8 py-16">
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">상품 목록</h1>
+        <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">
+          상품 목록 (Server Component + 비동기 데이터 페칭)
+        </h1>
         <Link
           href="/products/new"
           className="text-sm font-medium text-zinc-950 underline underline-offset-4 dark:text-zinc-50"
