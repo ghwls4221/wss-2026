@@ -1,13 +1,14 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getNotice } from "@/lib/notices";
+import { CategoryBadge } from "@/components/CategoryBadge";
 
 // products/[id]/page.tsx와 동일한 동적 라우팅 패턴입니다.
 type Props = { params: Promise<{ id: string }> };
 
 export default async function NoticeDetailPage({ params }: Props) {
   const { id } = await params;
-  const notice = await getNotice(id);
+  const notice = await getNotice(id); // 열 때마다 조회수 +1
 
   if (!notice) {
     notFound();
@@ -18,9 +19,12 @@ export default async function NoticeDetailPage({ params }: Props) {
       <Link href="/notices" className="text-sm text-zinc-500 hover:underline">
         ← 목록으로
       </Link>
-      <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">{notice.title}</h1>
+      <div className="flex items-center gap-2">
+        <CategoryBadge category={notice.category} />
+        <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">{notice.title}</h1>
+      </div>
       <p className="text-sm text-zinc-500 dark:text-zinc-400">
-        {notice.author} · {notice.createdAt}
+        {notice.author} · {notice.createdAt} · 조회 {notice.views}
       </p>
       <p className="whitespace-pre-wrap leading-7 text-zinc-700 dark:text-zinc-300">
         {notice.content}
