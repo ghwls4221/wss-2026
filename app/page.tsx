@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ClickCounter } from "@/components/ClickCounter";
 
 // app/page.tsx는 "/" 경로를 담당합니다 (File-based Routing).
 // "use client"가 없으므로 기본값인 Server Component입니다.
@@ -19,6 +20,9 @@ export default function Home() {
           3주차부터 7주차까지 수업에서 배운 기능을 하나씩 붙여 가며 만든 프로젝트입니다.
           공지사항 게시판과 상품 페이지는 MongoDB에 저장되고, 회원가입한 뒤 로그인할 수 있습니다.
         </p>
+
+        {/* Server Component 안에 넣은 Client Component */}
+        <ClickCounter />
 
         <div className="flex flex-col gap-3 text-sm">
           {LINKS.map((href) => (
