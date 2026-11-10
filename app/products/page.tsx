@@ -16,7 +16,7 @@ export default async function ProductsPage() {
   return (
     <div className="mx-auto max-w-2xl flex-1 px-8 py-16">
       <div className="mb-2 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">쇼핑몰 — 상품 목록</h1>
+        <h1 className="text-2xl font-semibold text-black dark:text-zinc-50">학과 굿즈샵</h1>
         {/* 버튼을 숨기는 건 사용자 경험일 뿐, 진짜 권한 검사는 createProductAction 안에 있습니다 */}
         {isAdmin && (
           <Link
@@ -28,7 +28,7 @@ export default async function ProductsPage() {
         )}
       </div>
       <p className="mb-8 text-sm text-zinc-500 dark:text-zinc-400">
-        담기 버튼을 누르면 쿠키 기반 장바구니에 저장됩니다 — 로그인하지 않아도 사용할 수 있습니다.
+        마음에 드는 굿즈를 장바구니에 담아 보세요. 로그인하지 않아도 담을 수 있어요.
       </p>
       <ul className="flex flex-col gap-4">
         {products.map((p) => (

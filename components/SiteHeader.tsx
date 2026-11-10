@@ -29,7 +29,7 @@ export async function SiteHeader() {
           <Link href="/cart" className="hover:text-black dark:hover:text-zinc-50">
             장바구니
             {cartCount > 0 && (
-              <span className="ml-1.5 rounded-full bg-black px-1.5 py-0.5 text-[10px] font-semibold text-white dark:bg-white dark:text-black">
+              <span className="ml-1.5 rounded-full bg-indigo-600 px-1.5 py-0.5 text-[10px] font-semibold text-white dark:bg-indigo-500">
                 {cartCount}
               </span>
             )}

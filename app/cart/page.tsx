@@ -95,7 +95,7 @@ export default async function CartPage() {
               <form action={checkoutAction}>
                 <button
                   type="submit"
-                  className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-black/85 dark:bg-white dark:text-black"
+                  className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400"
                 >
                   결제하기
                 </button>
@@ -103,14 +103,14 @@ export default async function CartPage() {
             ) : (
               <Link
                 href="/login"
-                className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-black/85 dark:bg-white dark:text-black"
+                className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400"
               >
                 로그인하고 결제하기
               </Link>
             )}
           </div>
           <p className="mt-3 text-right text-xs text-zinc-400 dark:text-zinc-500">
-            여기 보이는 가격은 참고용입니다 — checkoutAction이 결제 직전 DB에서 다시 계산합니다.
+            결제할 때 최신 가격과 재고로 한 번 더 계산돼요.
           </p>
         </>
       )}

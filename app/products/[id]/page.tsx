@@ -51,14 +51,13 @@ export default async function ProductDetailPage({ params }: Props) {
         <button
           type="submit"
           disabled={product.stock === 0}
-          className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-black/85 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-black"
+          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-indigo-500 dark:hover:bg-indigo-400"
         >
           {product.stock === 0 ? "품절" : "장바구니에 담기"}
         </button>
       </form>
       <p className="text-xs text-zinc-400 dark:text-zinc-500">
-        폼에 적은 수량은 그대로 저장되지 않습니다 — addToCartAction이 실제 재고를 다시
-        조회해서 그 범위 안으로 맞춥니다(lib/actions.ts 참고).
+        재고보다 많이 담으면 남은 재고만큼만 담겨요.
       </p>
     </div>
   );
