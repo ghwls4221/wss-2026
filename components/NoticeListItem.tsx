@@ -3,7 +3,7 @@ import type { Notice } from "@/lib/notices";
 import { CategoryBadge } from "@/components/CategoryBadge";
 
 // (5주차 과제) 목록의 <li> 항목을 컴포넌트로 분리해 재사용
-// 공지 목록(/notices)과 홈 화면의 "최근 공지"에서 같이 씁니다.
+// 공지 목록(/notices)과 "내가 쓴 글"(/notices/mine)에서 같이 씁니다.
 export function NoticeListItem({ notice }: { notice: Notice }) {
   return (
     <li>
@@ -16,7 +16,7 @@ export function NoticeListItem({ notice }: { notice: Notice }) {
           <p className="font-medium text-black dark:text-zinc-50">{notice.title}</p>
         </div>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          {notice.author} · {notice.createdAt} · 조회 {notice.views}
+          {notice.authorName} · {notice.createdAt} · 조회 {notice.views}
         </p>
       </Link>
     </li>

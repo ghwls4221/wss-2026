@@ -1,13 +1,16 @@
 import { Schema, model, models } from "mongoose";
 
-// 4주차에는 메모리 배열이었던 상품 데이터를 MongoDB에 저장합니다.
-// Vercel(서버리스)은 요청마다 서버가 바뀔 수 있어 메모리 배열은 새로고침하면
-// 사라지기 때문에, 배포 환경에서도 유지되도록 DB로 옮겼습니다.
+// 상품 카탈로그 스키마입니다. 4주차에서 in-memory 배열로 흉내냈던 상품
+// 목록을, 이번 주부터는 공지사항과 마찬가지로 실제 MongoDB 컬렉션으로
+// 관리합니다. 이미지 업로드는 이 과목 범위를 벗어나므로, 실제 이미지
+// 대신 이모지 하나로 상품을 표시해 실습을 단순화합니다.
 const productSchema = new Schema(
   {
-    name: { type: String, required: true, trim: true, maxlength: 50 },
-    description: { type: String, required: true, trim: true, maxlength: 300 },
-    likes: { type: Number, default: 0, min: 0 },
+    name: { type: String, required: true, trim: true },
+    description: { type: String, required: true },
+    price: { type: Number, required: true, min: 0 },
+    emoji: { type: String, required: true },
+    stock: { type: Number, required: true, min: 0, default: 0 },
   },
   { timestamps: true }
 );
