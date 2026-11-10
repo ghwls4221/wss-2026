@@ -7,42 +7,154 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
-import { likeProduct as likeProductInDb, createProduct } from "@/lib/products";
-import { createNotice } from "@/lib/notices";
+import { getProduct, getProductsByIds, decrementStock, createProduct } from "@/lib/products";
+import { addToCart, updateCartQty, removeFromCart, getCartLines, clearCart } from "@/lib/cart";
+import { createOrder } from "@/lib/orders";
+import { createNotice, deleteNotice, getNotice } from "@/lib/notices";
 import { createUser } from "@/lib/users";
 import { NOTICE_CATEGORIES } from "@/models/Notice";
-import { signIn, signOut } from "@/auth";
+import { signIn, signOut, auth } from "@/auth";
 
-// (4주차 과제) 새 상품 추가 — 폼 + Server Action
-// 브라우저의 required/maxLength는 개발자도구로 우회할 수 있으므로 서버에서 다시 검증합니다.
+// (4주차 과제 → 9주차 권한 적용) 새 상품 추가 — 관리자만 가능
+// 4주차에는 누구나 상품을 추가할 수 있었지만, 상품 카탈로그는 운영자가
+// 채우는 데이터이므로 9주차의 RBAC 원칙에 맞춰 admin만 허용합니다.
+// 화면에서 버튼을 숨기는 것과 별개로, 여기 서버 코드에서 반드시 다시 확인합니다.
 export async function createProductAction(formData: FormData) {
-  const name = String(formData.get("name") ?? "").trim();
-  const description = String(formData.get("description") ?? "").trim();
-
-  if (!name || !description || name.length > 50 || description.length > 300) {
-    throw new Error("상품명(50자 이내)과 설명(300자 이내)을 입력해주세요.");
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+  if (session.user.role !== "admin") {
+    throw new Error("상품 추가 권한이 없습니다(관리자 전용).");
   }
 
-  const product = await createProduct({ name, description });
+  const name = String(formData.get("name") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const emoji = String(formData.get("emoji") ?? "").trim() || "📦";
+  const price = Number(formData.get("price"));
+  const stock = Number(formData.get("stock"));
+
+  // 브라우저의 required/maxLength/min은 개발자도구로 우회할 수 있으므로 서버에서 다시 검증합니다.
+  if (!name || !description || name.length > 50 || description.length > 300 || emoji.length > 8) {
+    throw new Error("상품명(50자 이내)과 설명(300자 이내)을 입력해주세요.");
+  }
+  if (!Number.isInteger(price) || price < 0 || !Number.isInteger(stock) || stock < 0) {
+    throw new Error("가격과 재고는 0 이상의 정수로 입력해주세요.");
+  }
+
+  const product = await createProduct({ name, description, price, emoji, stock });
   revalidatePath("/products");
   redirect(`/products/${product.id}`);
 }
 
-export async function likeProductAction(id: string) {
-  const newLikes = await likeProductInDb(id);
-  // 이 경로를 다시 그리도록 Next.js에 알려줍니다 — 다른 탭/새로고침에서도
-  // 최신 좋아요 수가 보이게 합니다.
-  revalidatePath(`/products/${id}`);
-  return newLikes;
+// 10주차부터 상품 목록/상세 페이지는 "좋아요" 대신 실제 장바구니 담기를
+// 지원합니다. 폼에서 넘어온 수량(qty)을 그대로 믿지 않고, 실제 재고를
+// 다시 조회해서 그 범위 안으로 맞춥니다 — "클라이언트가 보낸 값은 항상
+// 조작될 수 있다"는 9주차의 교훈이 장바구니에도 그대로 적용됩니다.
+export async function addToCartAction(formData: FormData) {
+  const productId = String(formData.get("productId") ?? "");
+  const requestedQty = Math.max(1, Number(formData.get("qty") ?? 1) || 1);
+  if (!productId) {
+    throw new Error("잘못된 상품입니다.");
+  }
+
+  const product = await getProduct(productId);
+  if (!product || product.stock === 0) {
+    throw new Error("담을 수 없는 상품입니다.");
+  }
+
+  const qty = Math.min(requestedQty, product.stock);
+  await addToCart(productId, qty);
+
+  // 장바구니 개수 배지는 모든 페이지의 SiteHeader(루트 레이아웃)에 있으므로,
+  // 특정 경로가 아니라 레이아웃 자체를 다시 그리도록 알려줘야 합니다.
+  revalidatePath("/", "layout");
 }
 
-// 4주차의 likeProductAction과 달리, 이 액션은 <form action={...}>에
-// 직접 연결됩니다. 함수를 호출하는 자바스크립트 코드 없이도 폼이
-// 제출되면 Next.js가 FormData를 담아 이 함수를 서버에서 실행합니다.
-// 즉 이 페이지는 클라이언트 자바스크립트가 없어도 기본 동작이 가능합니다.
+export async function updateCartQtyAction(formData: FormData) {
+  const productId = String(formData.get("productId") ?? "");
+  const requestedQty = Number(formData.get("qty") ?? 0);
+  if (!productId) {
+    throw new Error("잘못된 상품입니다.");
+  }
+
+  if (requestedQty <= 0) {
+    await removeFromCart(productId);
+  } else {
+    const product = await getProduct(productId);
+    const qty = product ? Math.min(requestedQty, product.stock) : requestedQty;
+    await updateCartQty(productId, qty);
+  }
+
+  revalidatePath("/", "layout");
+}
+
+export async function removeFromCartAction(formData: FormData) {
+  const productId = String(formData.get("productId") ?? "");
+  if (!productId) {
+    throw new Error("잘못된 상품입니다.");
+  }
+  await removeFromCart(productId);
+  revalidatePath("/", "layout");
+}
+
+// 11주차: 장바구니를 실제 주문으로 바꿉니다. 결제 대행사 연동은 이
+// 과목 범위 밖이므로 "결제하기"는 곧바로 주문을 만드는 것으로
+// 단순화합니다. 핵심은 결제 자체가 아니라, 아래 세 가지입니다.
+//
+// 1) 로그인하지 않으면 애초에 주문을 만들 수 없다 (인증)
+// 2) 가격/이름은 쿠키(클라이언트가 들고 있는 값)가 아니라 DB에서
+//    다시 조회해 채운다 (가격 변조 방지 — 10주차 lib/cart.ts와 같은 원칙)
+// 3) 주문에는 반드시 로그인한 사용자의 id가 서버에서 채워진다
+//    (다른 사람 이름으로 주문을 만들 수 없게)
+export async function checkoutAction() {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  const lines = await getCartLines();
+  if (lines.length === 0) {
+    throw new Error("장바구니가 비어 있습니다.");
+  }
+
+  const products = await getProductsByIds(lines.map((line) => line.productId));
+  const items = lines
+    .map((line) => {
+      const product = products.find((p) => p.id === line.productId);
+      if (!product) return null;
+      // 재고를 다시 한 번 이 시점 기준으로 강제합니다 — 장바구니에
+      // 담아둔 사이 재고가 줄어들었을 수도 있습니다.
+      const qty = Math.min(line.qty, product.stock);
+      if (qty <= 0) return null;
+      return { productId: product.id, name: product.name, price: product.price, qty };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+
+  if (items.length === 0) {
+    throw new Error("주문할 수 있는 상품이 없습니다(품절되었을 수 있습니다).");
+  }
+
+  const order = await createOrder(session.user.id, items);
+  await Promise.all(items.map((item) => decrementStock(item.productId, item.qty)));
+  await clearCart();
+
+  revalidatePath("/", "layout");
+  revalidatePath("/orders");
+  redirect(`/orders/${order.id}`);
+}
+
+// 9주차부터 이 액션은 로그인 여부를 직접 확인합니다. middleware.ts가
+// /notices/new 페이지 접근 자체를 막아주지만, Server Action은 middleware의
+// matcher와 무관하게 어디서든(다른 페이지, 심지어 조작된 요청에서도) 호출될
+// 수 있습니다. 그래서 "이중 방어"로 액션 내부에서도 반드시 다시 확인합니다.
 export async function createNoticeAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+
   const title = String(formData.get("title") ?? "").trim();
-  const author = String(formData.get("author") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
   const categoryInput = String(formData.get("category") ?? "일반");
   // 정해진 카테고리 목록에 없는 값이 오면 "일반"으로 (조작된 요청 방어)
@@ -50,16 +162,58 @@ export async function createNoticeAction(formData: FormData) {
     ? categoryInput
     : "일반";
 
-  if (!title || !author || !content) {
-    throw new Error("제목, 작성자, 내용을 모두 입력해주세요.");
+  if (!title || !content) {
+    throw new Error("제목과 내용을 모두 입력해주세요.");
   }
-  if (title.length > 100 || author.length > 30 || content.length > 2000) {
+  if (title.length > 100 || content.length > 2000) {
     throw new Error("입력 길이 제한을 초과했습니다.");
   }
 
-  const notice = await createNotice({ title, author, content, category });
+  // author는 더 이상 폼에서 입력받지 않습니다 — 로그인한 사용자의 세션에서
+  // 서버가 직접 가져옵니다. 그렇지 않으면 누구든 폼 값을 조작해서
+  // 다른 사람 이름으로 글을 쓸 수 있습니다.
+  const notice = await createNotice({
+    title,
+    content,
+    category,
+    authorId: session.user.id,
+    authorName: session.user.name ?? "이름 없음",
+  });
   revalidatePath("/notices");
   redirect(`/notices/${notice.id}`);
+}
+
+// 삭제 권한 검사가 이번 주의 핵심입니다. 화면에는 작성자 본인 또는
+// admin에게만 삭제 버튼이 보이지만(app/notices/[id]/page.tsx), 그건 어디까지나
+// 사용자 경험일 뿐입니다. 버튼이 안 보인다고 해서 요청 자체를 막을 수는
+// 없습니다 — 개발자 도구나 직접 조작한 요청으로 얼마든지 이 함수를 호출할
+// 수 있으므로, 진짜 방어는 반드시 여기, 서버 코드 안에 있어야 합니다.
+export async function deleteNoticeAction(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  if (!id) {
+    throw new Error("잘못된 요청입니다.");
+  }
+
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  const notice = await getNotice(id);
+  if (!notice) {
+    throw new Error("존재하지 않는 게시글입니다.");
+  }
+
+  const isOwner = notice.authorId === session.user.id;
+  const isAdmin = session.user.role === "admin";
+  if (!isOwner && !isAdmin) {
+    throw new Error("삭제 권한이 없습니다.");
+  }
+
+  await deleteNotice(id);
+  revalidatePath("/notices");
+  revalidatePath("/notices/mine");
+  redirect("/notices");
 }
 
 // 회원가입: 비밀번호를 해싱해 User 컬렉션에 저장한 뒤, 곧바로 로그인까지

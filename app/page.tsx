@@ -3,7 +3,7 @@ import { ClickCounter } from "@/components/ClickCounter";
 
 // app/page.tsx는 "/" 경로를 담당합니다 (File-based Routing).
 // "use client"가 없으므로 기본값인 Server Component입니다.
-const LINKS = ["/notices", "/products", "/register", "/about", "/api/hello"];
+const LINKS = ["/notices", "/notices/mine", "/products", "/cart", "/orders", "/register", "/about", "/api/hello"];
 
 export default function Home() {
   return (
@@ -17,8 +17,8 @@ export default function Home() {
           웹서버보안프로그래밍 — 정호진
         </h1>
         <p className="max-w-md text-base leading-7 text-zinc-600 dark:text-zinc-400">
-          3주차부터 7주차까지 수업에서 배운 기능을 하나씩 붙여 가며 만든 프로젝트입니다.
-          공지사항 게시판과 상품 페이지는 MongoDB에 저장되고, 회원가입한 뒤 로그인할 수 있습니다.
+          3주차부터 11주차까지 수업에서 배운 기능을 하나씩 붙여 가며 만든 프로젝트입니다.
+          공지사항 게시판과 쇼핑몰(장바구니·주문)은 MongoDB에 저장되고, 로그인한 사람만 글을 쓰고 주문할 수 있습니다.
         </p>
 
         {/* Server Component 안에 넣은 Client Component */}
