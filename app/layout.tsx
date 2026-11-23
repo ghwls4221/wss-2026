@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "웹서버보안프로그래밍 — 정호진",
-  description: "정호진의 웹서버보안프로그래밍 실습 — 학과 공지 게시판과 굿즈샵",
+  description: "정호진의 웹서버보안프로그래밍 실습 — 학과 공지 게시판과 쇼핑몰",
 };
 
 // app/layout.tsx는 모든 페이지를 감싸는 "루트 레이아웃"입니다.

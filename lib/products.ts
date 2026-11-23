@@ -30,15 +30,13 @@ function toProduct(doc: ProductDoc): Product {
   };
 }
 
-// 데모용 초기 상품 데이터입니다. 4주차 in-memory 샘플과 겹치는 상품도
-// 있지만, 이번엔 실제 컬렉션에 저장되어 여러 사용자/요청이 같은 데이터를
-// 공유합니다.
+// 데모용 초기 상품 데이터입니다. 컬렉션이 비어 있을 때만 들어갑니다.
 const SEED_PRODUCTS = [
-  { name: "정보보호학과 후드티", description: "시험 기간 밤샘용 따뜻한 학과 후드티", price: 35000, emoji: "🧥", stock: 25 },
-  { name: "보안 체크리스트 노트", description: "비밀번호 해싱부터 XSS까지 정리한 공부 노트", price: 6000, emoji: "📓", stock: 50 },
-  { name: "정보보호학과 스티커", description: "노트북에 붙이는 학과 로고 스티커", price: 3000, emoji: "🏷️", stock: 100 },
-  { name: "기계식 키보드", description: "타건감 좋은 87키 기계식 키보드", price: 89000, emoji: "⌨️", stock: 15 },
-  { name: "노트북 거치대", description: "목/어깨 건강을 지키는 알루미늄 거치대", price: 32000, emoji: "💻", stock: 20 },
+  { name: "아이폰", description: "6.1인치 디스플레이, 128GB 스마트폰", price: 1250000, emoji: "📱", stock: 20 },
+  { name: "아이패드", description: "11인치 태블릿, 필기와 영상 강의용", price: 799000, emoji: "📲", stock: 15 },
+  { name: "맥북", description: "13인치 노트북, 과제와 개발용", price: 1590000, emoji: "💻", stock: 10 },
+  { name: "충전기", description: "USB-C 고속 충전기 (35W)", price: 59000, emoji: "🔌", stock: 50 },
+  { name: "노트북 거치대", description: "목·어깨 건강을 지키는 알루미늄 거치대", price: 32000, emoji: "🗂️", stock: 30 },
 ];
 
 // 상품 카탈로그는 (공지사항과 달리) 사용자가 아니라 운영자가 채워 넣는

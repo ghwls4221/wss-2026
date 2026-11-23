@@ -11,7 +11,7 @@ export default function AboutPage() {
       </h1>
       <p className="max-w-md text-base leading-7 text-zinc-600 dark:text-zinc-400">
         웹서버보안프로그래밍 수업에서 매주 기능을 하나씩 붙여 만든 실습 사이트입니다.
-        학과 공지 게시판에서 글을 쓰고, 학과 굿즈샵에서 장바구니에 담아 주문할 수 있어요.
+        학과 공지 게시판에서 글을 쓰고, 쇼핑몰에서 상품을 장바구니에 담아 주문할 수 있어요.
       </p>
       <p className="text-sm text-zinc-500 dark:text-zinc-400">정호진 · 중부대학교 정보보호학과</p>
       <Link
